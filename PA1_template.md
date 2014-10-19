@@ -24,14 +24,16 @@ The dataset is stored in a comma-separated-value (CSV) file and there are a tota
 
 ##Firstly setting some default options
 
-```{r}
+
+```r
 par(mfcol = c(1,1))
 par(mar = c(5.1,4.1,4.1,2.1))
 ```
 
 ##Loading and preprocessing the data
 
-```{r}
+
+```r
 data<-read.csv("./activity/activity.csv")
 ```
   
@@ -41,19 +43,32 @@ data<-read.csv("./activity/activity.csv")
 
 Histogram of the total number of steps taken each day
 
-```{r, echo=TRUE}
+
+```r
 TotalStepsPerDay<-aggregate(data$steps, by=list(Category=data$date), FUN=sum)
 hist(TotalStepsPerDay$x,xlab = "total number of steps taken each day",main = "Histogram of total number of steps taken each day")
 ```
 
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
+
 **Mean** of total number of steps taken per day
-```{r}
+
+```r
 mean(TotalStepsPerDay$x,na.rm = T)
 ```
 
+```
+## [1] 10766.19
+```
+
 **Median** total number of steps taken per day
-```{r}
+
+```r
 median(TotalStepsPerDay$x,na.rm = T)
+```
+
+```
+## [1] 10765
 ```
   
   
@@ -62,16 +77,24 @@ median(TotalStepsPerDay$x,na.rm = T)
 
 A time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
 
-```{r}
+
+```r
 x<-aggregate(data$steps ~ data$interval, data, sum)
 plot(x[,1],x[,2],type="l",xlab ="5-minute interval",ylab = "avg no. of steps taken, avg across all days",main = "Average daily activity pattern")
 ```
 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6-1.png) 
+
 The 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps
 
-```{r}
+
+```r
 maxStepsInterval<-x[x[,2]==max(x[,2]),1]
 maxStepsInterval
+```
+
+```
+## [1] 835
 ```
   
    
@@ -83,14 +106,20 @@ days may introduce bias into some calculations or summaries of the data.
 
 Total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
-```{r}
+
+```r
 NaCount<-sum(is.na(data[,1]))
 NaCount
 ```
 
+```
+## [1] 2304
+```
+
 Strategy for filling in all of the missing values in the dataset. I use mean for that 5-minute interval
 
-```{r}
+
+```r
 temp<-data[is.na(data[,1]),]
 mx<-aggregate(data$steps ~ data$interval, data, mean)
 for (i in 1:NaCount)
@@ -101,25 +130,39 @@ for (i in 1:NaCount)
 
 A new dataset that is equal to the original dataset but with the missing data filled in
 
-```{r}
+
+```r
 ModifiedDataSet<-data
 ModifiedDataSet[is.na(data[,1]),1]<-temp[,1]
 ```
 
 Histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day
 
-```{r}
+
+```r
 mTotalStepsPerDay<-aggregate(ModifiedDataSet$steps, by=list(Category=ModifiedDataSet$date), FUN=sum)
 hist(mTotalStepsPerDay$x,xlab = "total number of steps taken each day",main = "Histogram of total number of steps taken each day")
 ```
 
+![plot of chunk unnamed-chunk-11](figure/unnamed-chunk-11-1.png) 
+
 **Mean** of total number of steps taken per day
-```{r}
+
+```r
 mean(mTotalStepsPerDay$x,na.rm = T)
 ```
+
+```
+## [1] 10766.19
+```
 **Median** of total number of steps taken per day
-```{r}
+
+```r
 median(mTotalStepsPerDay$x,na.rm = T)
+```
+
+```
+## [1] 10766.19
 ```
 Yes, these valus differ from those calculated with missing values. It impacts the heights of each bar of histogram. It rises a little bit of their height, as compared to the case when there are missing values. But the mean and median almost remain same.
   
@@ -129,7 +172,8 @@ Yes, these valus differ from those calculated with missing values. It impacts th
 
 New factor variable in the dataset with two levels -- "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.
 
-```{r}
+
+```r
 ModifiedDataSet<-transform(ModifiedDataSet,date=strptime(ModifiedDataSet[,2], format='%Y-%m-%d'))
 ModifiedDataSet["weekDayType"]<-rep("weekday",nrow(ModifiedDataSet))
 ModifiedDataSet[weekdays(ModifiedDataSet$date) %in% c("Saturday","Sunday"),"weekDayType"]<-rep("weekend",sum(weekdays(ModifiedDataSet$date) %in% c("Saturday","Sunday")))
@@ -138,7 +182,8 @@ ModifiedDataSet<-transform(ModifiedDataSet,weekDayType=as.factor(ModifiedDataSet
 
 Plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).
 
-```{r}
+
+```r
 par(mfcol = c(2,1))
 par(mar = c(2,2,1.5,2))
 
@@ -149,3 +194,6 @@ plot(weekendDataSummary[,1],weekendDataSummary[,2],type="l",xlab ="",ylab = "",m
 weekdayData<-ModifiedDataSet[ModifiedDataSet[,4]=="weekday",]
 weekdayDataSummary<-aggregate(weekdayData$steps ~ weekdayData$interval, weekdayData, sum)
 plot(weekdayDataSummary[,1],weekdayDataSummary[,2],type="l",xlab ="",ylab = "",main = "weekday")
+```
+
+![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15-1.png) 
